@@ -61,6 +61,10 @@ def get_db():
 #         print("Error: ", error)
 #     time.sleep(2)
 
+@app.get("/")
+def root():
+    return {"message": "API is running!"}
+
 
 @app.get("/posts")
 async def get_all_post(db: Session = Depends(get_db)):
