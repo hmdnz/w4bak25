@@ -22,6 +22,10 @@ from database import engine, SessionLocal, get_db, Base
 
 from sqlalchemy.exc import IntegrityError
 
+print("🔌 SQLAlchemy connected to:", engine.url)
+
+
+
 models.Base.metadata.create_all(bind=engine)
 
 
