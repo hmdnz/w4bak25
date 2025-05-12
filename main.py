@@ -180,19 +180,16 @@ def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
     
     except IntegrityError as e:
         db.rollback()
-        if "users_orm_email_key" in str(e.orig):
+        if "users_email_key" in str(e.orig):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                                 detail="User with this email already exists")
-        elif "users_orm_phone_key" in str(e.orig):
+        elif "users_phone_key" in str(e.orig):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                                 detail="User with this phone number already exists")
-        elif "users_orm_nin_key" in str(e.orig):
+        elif "users_nin_key" in str(e.orig):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                                 detail="User with this NIN already exists")
-        # You might not have an explicit unique constraint on 'id' if it's the primary key
-        # but if you do, you can add a similar check here.
         else:
-            # If it's some other integrity error, you might want to log it
-            # or return a generic error message.
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not create user")
+
