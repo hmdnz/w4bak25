@@ -16,8 +16,8 @@ from auth import  models , schema, oauth2, utils
 from auth.models import User  # Import the User model from models.py
 from auth.schema import UserCreate  # Assuming you have a UserCreate Pydantic schema
 from auth.auth import router as auth_router
-from auth.utils import hash_password, send_email
-
+from auth.utils import hash_password
+# from auth.utils import send_email
 from database import engine, SessionLocal, get_db, Base
 
 from sqlalchemy.exc import IntegrityError
