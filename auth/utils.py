@@ -16,28 +16,28 @@ def hash_password(password):
     return pwd_context.hash(password)
 
 
-def send_email(to_email: str, subject: str, body: str):
-    sender_email = "info@wenyfour.com"
-    # Use Zoho app password, not your regular login password
-    sender_password = "%E1orgkz"
-    smtp_server = "smtp.zoho.com"
-    port = 587  # TLS port for Zoho
+# def send_email(to_email: str, subject: str, body: str):
+#     sender_email = "info@wenyfour.com"
+#     # Use Zoho app password, not your regular login password
+#     sender_password = "%E1orgkz"
+#     smtp_server = "smtp.zoho.com"
+#     port = 587  # TLS port for Zoho
 
-    msg = MIMEMultipart()
-    msg['From'] = sender_email
-    msg['To'] = to_email
-    msg['Subject'] = subject
+#     msg = MIMEMultipart()
+#     msg['From'] = sender_email
+#     msg['To'] = to_email
+#     msg['Subject'] = subject
 
-    msg.attach(MIMEText(body, 'plain'))
+#     msg.attach(MIMEText(body, 'plain'))
 
-    try:
-        with smtplib.SMTP(smtp_server, port) as server:
-            server.starttls()
-            server.login(sender_email, sender_password)
-            server.send_message(msg)
-            print("✅ Email sent successfully")
-    except Exception as e:
-        print(f"❌ Failed to send email: {e}")
+#     try:
+#         with smtplib.SMTP(smtp_server, port) as server:
+#             server.starttls()
+#             server.login(sender_email, sender_password)
+#             server.send_message(msg)
+#             print("✅ Email sent successfully")
+#     except Exception as e:
+#         print(f"❌ Failed to send email: {e}")
 
 
 # from datetime import datetime, timedelta
