@@ -19,7 +19,10 @@ class Post(Base):
 
 
 class User(Base):
-    __tablename__ = "users_orm"  # Choose a suitable table name
+    __tablename__ = "users"  # for cloud db
+
+
+    # __tablename__ = "users_orm"  # Choose a suitable table name for local db
 
     id = Column(UUID(as_uuid=True), primary_key=True,
                 default=func.gen_random_uuid())
