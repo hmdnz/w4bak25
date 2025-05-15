@@ -2,20 +2,20 @@ from database import Base
 from sqlalchemy import Column, Integer, String, Boolean, text, TIMESTAMP, func, DateTime
 from sqlalchemy import Date
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 
+# class Post(Base):
+#     __tablename__ = "posts_orm"
 
-class Post(Base):
-    __tablename__ = "posts_orm"
-
-    id = Column(Integer, primary_key=True, nullable=False)
-    title = Column(String, nullable=False)
-    content = Column(String, nullable=False)
-    published = Column(Boolean, server_default='TRUE', nullable=True)
-    rating = Column(Integer, nullable=True)
-    created_at = Column(TIMESTAMP(timezone=True),
-                        nullable=False, server_default=text('now()'))
-    updated_at = Column(TIMESTAMP(timezone=True),
-                        nullable=False, server_default=text('now()'))
+#     id = Column(Integer, primary_key=True, nullable=False)
+#     title = Column(String, nullable=False)
+#     content = Column(String, nullable=False)
+#     published = Column(Boolean, server_default='TRUE', nullable=True)
+#     rating = Column(Integer, nullable=True)
+#     created_at = Column(TIMESTAMP(timezone=True),
+#                         nullable=False, server_default=text('now()'))
+#     updated_at = Column(TIMESTAMP(timezone=True),
+#                         nullable=False, server_default=text('now()'))
 
 
 class User(Base):
@@ -24,7 +24,7 @@ class User(Base):
 
     # __tablename__ = "users_orm"  # Choose a suitable table name for local db
 
-    id = Column(UUID(as_uuid=True), primary_key=True,
+    user_id = Column(UUID(as_uuid=True), primary_key=True,
                 default=func.gen_random_uuid())
     name = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
@@ -44,7 +44,7 @@ class User(Base):
                         nullable=False, server_default=text('now()'))
     updated_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
-
+    cars = relationship("CarModel", back_populates="owner")  # This line needs to be present
 # from datetime import datetime, date
 # from typing import Union, Optional
 # from pydantic import BaseModel, Field, EmailStr, AnyUrl
@@ -63,18 +63,18 @@ class User(Base):
 #     created_at: datetime = Field(None)
 #     updated_at: datetime = Field(None)
 
-#     class Config:
-#         arbitrary_types_allowed = True
-#         json_schema_extra = {
-#             "example": {
-#                 "name": "test user",
-#                 "email": "testuser@example.com",
-#                 "phone": "23480904578",
-#                 "nin": "300828566",
-#                 "password": "auth1234",
-#             }
-#         }
-
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "name": "test user",
+                "email": "testuser@example.com",
+                "phone": "23480904578",
+                "nin": "300828566",
+                "password": "auth1234",
+            }
+        },
+        "arbitrary_types_allowed": True,
+    }
 
 # class UpdateUserModel(BaseModel):
 #     name: Union[str, None]  = Field(None)
