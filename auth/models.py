@@ -25,7 +25,7 @@ class User(Base):
                         nullable=False, server_default=text('now()'))
     cars = relationship("CarModel", back_populates="owner")  # This line needs to be present
 
-    drivers = relationship("Driver", back_populates="user")
+    # drivers = relationship("Driver", back_populates="user")
     
     
     

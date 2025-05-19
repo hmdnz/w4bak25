@@ -20,7 +20,7 @@ class CarModel(Base):
 
     owner = relationship("User", back_populates="cars")  # This line is crucial
 
-    driver = relationship("Driver", back_populates="cars")  # This line is crucial
+    # driver = relationship("Driver", back_populates="cars")  # This line is crucial
 
 model_config = {
         "from_attributes": True,
