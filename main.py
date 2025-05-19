@@ -23,7 +23,7 @@ from database import engine, SessionLocal, get_db, Base
 
 from auth.auth import router as auth_router
 from cars.routers import router as car_router   # Ensure you are using the correct import for the router
-from drivers.routers import router as driver_router
+# from drivers.routers import router as driver_router
 
 from sqlalchemy.exc import IntegrityError
 
