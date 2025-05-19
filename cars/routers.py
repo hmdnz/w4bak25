@@ -8,29 +8,28 @@ from cars.schema import CarResponseSchema, CarCreateSchema, CarSchema
 from sqlalchemy.orm import Session
 from database import get_db
 
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from .models import CarModel
 
 from auth.models import User
-# from auth.utils import filter_none_and_empty_fields
-# from driver.dependencies import get_current_user_by_jwtoken, get_token_header
 from auth.oauth2 import get_current_user
 
-router = APIRouter(tags=['Authentication'])
+router = APIRouter(tags=['Cars'])
 
-router = APIRouter(
-    
-    tags=["cars"],
-    # dependencies=[Depends(get_token_header)],
-    responses={404: {"description": "Not found"}},
-)
+@router.post("/create_car", response_model=CarResponseSchema)
+async def create_car(
+    car_in: CarCreateSchema,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    car_data = car_in.model_dump()  # ✅ Use model_dump instead of dict
+    car_data["user_id"] = current_user.user_id  # Inject user_id
 
-@router.post("/create", response_description="create a car object", response_model=CarResponseSchema, status_code=status.HTTP_201_CREATED)
-async def create_car(car: CarCreateSchema, user: Annotated[User, Depends(get_current_user)], db: Session = Depends(get_db)):
-    db_car = CarModel(**car.model_dump(), user_id=user.user_id)
-    db.add(db_car)
+    new_car = CarModel(**car_data)
+    db.add(new_car)
     db.commit()
-    db.refresh(db_car)
-    return db_car
+    db.refresh(new_car)
+    return new_car
 
 @router.put("/update/{car_id}/car", response_description="update a car's information", response_model=CarResponseSchema)
 async def update_car(car_id: int, car: CarSchema, user: Annotated[User, Depends(get_current_user)], db: Session = Depends(get_db)):

@@ -23,11 +23,15 @@ from database import engine, SessionLocal, get_db, Base
 
 from auth.auth import router as auth_router
 from cars.routers import router as car_router   # Ensure you are using the correct import for the router
+from drivers.routers import router as driver_router
 
 from sqlalchemy.exc import IntegrityError
 
 from cars.models import *
 from auth.models import *
+from drivers.models import *
+
+from models import User, Driver
 
 print("🔌 SQLAlchemy connected to:", engine.url)
 
@@ -37,8 +41,9 @@ router= APIRouter()
 
 app = FastAPI()
 
-app.include_router(car_router, tags=["Cars"])
 app.include_router(auth_router, tags=["Authentication"])
+app.include_router(car_router, tags=["Cars"])
+app.include_router(driver_router, tags=["Drivers"])
 
 def get_db():
     db = SessionLocal()
@@ -49,23 +54,6 @@ def get_db():
 
 
 
-# while True:
-#     try:
-#         conn = psycopg2.connect(
-#             host='localhost',
-#             database='fastapi',
-#             user='postgres',
-#             password='postgres',
-#             cursor_factory=RealDictCursor
-#         )
-
-#         cursor = conn.cursor(cursor_factory=RealDictCursor)
-#         print("Database connection was successful")
-#         break
-#     except Exception as error:
-#         print("Database connection was not successful")
-#         print("Error: ", error)
-#     time.sleep(2)
 
 @app.get("/")
 def root():

@@ -10,6 +10,7 @@ class CarModel(Base):
     __tablename__ = "cars"
 
     id = Column(Integer, primary_key=True, index=True)
+    driver_id = Column(UUID(as_uuid=True), ForeignKey("drivers.id"))  # <-- Add this line
     model = Column(String, nullable=False)
     brand = Column(String, nullable=False)
     color = Column(String, nullable=False)
@@ -19,6 +20,7 @@ class CarModel(Base):
 
     owner = relationship("User", back_populates="cars")  # This line is crucial
 
+    driver = relationship("Driver", back_populates="cars")  # This line is crucial
 
 model_config = {
         "from_attributes": True,
