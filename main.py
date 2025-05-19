@@ -29,9 +29,9 @@ from sqlalchemy.exc import IntegrityError
 
 from cars.models import *
 from auth.models import *
-from drivers.models import *
+# from drivers.models import *
 
-from models import User, Driver
+# from models import User, Driver
 
 print("🔌 SQLAlchemy connected to:", engine.url)
 
@@ -43,7 +43,7 @@ app = FastAPI()
 
 app.include_router(auth_router, tags=["Authentication"])
 app.include_router(car_router, tags=["Cars"])
-app.include_router(driver_router, tags=["Drivers"])
+# app.include_router(driver_router, tags=["Drivers"])
 
 def get_db():
     db = SessionLocal()
