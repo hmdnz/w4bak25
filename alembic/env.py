@@ -12,7 +12,15 @@ from cars.models import CarModel
 # access to the values within the .ini file in use.
 config = context.config
 config.set_main_option
-("sqlalchemy.url", "postgresql+psycopg2://w4db_owner:npg_xWoI9kDuBU5G@ep-muddy-heart-abkolm3g-pooler.eu-west-2.aws.neon.tech/w4db?sslmode=require")
+
+# ec2 connection string
+("sqlalchemy.url","postgresql://postgres+psycopg2:postgres@13.245.183.49/wenyfourdb")
+
+
+# neondb connection string
+# ("sqlalchemy.url", "postgresql+psycopg2://w4db_owner:npg_xWoI9kDuBU5G@ep-muddy-heart-abkolm3g-pooler.eu-west-2.aws.neon.tech/w4db?sslmode=require")
+
+
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:

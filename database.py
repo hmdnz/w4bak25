@@ -3,12 +3,20 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker
 
+# Ec2 # db connection string
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres+psycopg2:postgres@13.245.183.49/wenyfourdb"
 
-SQLALCHEMY_DATABASE_URL = 'postgresql://w4db_owner:npg_xWoI9kDuBU5G@ep-muddy-heart-abkolm3g-pooler.eu-west-2.aws.neon.tech/w4db?sslmode=require'
+# Neon db # connection string
+# SQLALCHEMY_DATABASE_URL = 'postgresql://w4db_owner:npg_xWoI9kDuBU5G@ep-muddy-heart-abkolm3g-pooler.eu-west-2.aws.neon.tech/w4db?sslmode=require'
+
+# Local db connection string
 
 # SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/fastapi"
 
+# Azure db connection string
 # SQLALCHEMY_DATABASE_URL ="postgresql://weny4db_owner:npg_SpcX1bAQNh8z@ep-falling-scene-a9t9i586-pooler.gwc.azure.neon.tech/weny4db?sslmode=require"
+
+
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine) 
