@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker
 
 # Ec2 # db connection string
-SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://postgres:postgres@13.245.183.49/wenyfourdb"
+SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://postgres:postgres@13.247.74.33/wenyfourdb"
 
 # Neon db # connection string
 # SQLALCHEMY_DATABASE_URL = 'postgresql://w4db_owner:npg_xWoI9kDuBU5G@ep-muddy-heart-abkolm3g-pooler.eu-west-2.aws.neon.tech/w4db?sslmode=require'
