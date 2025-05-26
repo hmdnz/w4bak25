@@ -14,7 +14,7 @@ config = context.config
 config.set_main_option
 
 # ec2 connection string
-("sqlalchemy.url","postgresql+psycopg2://postgres:postgres@13.247.74.33/wenyfourdb")
+("sqlalchemy.url","postgresql+psycopg2://postgres:postgres@13.247.159.250/wenyfourdb")
 
 
 # neondb connection string
@@ -88,3 +88,4 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()
+
