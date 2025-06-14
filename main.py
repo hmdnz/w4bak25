@@ -57,7 +57,7 @@ def get_db():
 
 @app.get("/")
 def root():
-    return {"message": "API is running!"}
+    return {"message": "Helllo friend, the API is running!"}
 
 
 # @app.get("/posts")

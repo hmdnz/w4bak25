@@ -3,7 +3,8 @@ from sqlalchemy import Column, Integer, String, Boolean, text, TIMESTAMP, func, 
 from sqlalchemy import Date
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-
+from drivers.models import Driver  # Import the Driver model
+from cars.models import CarModel  # Import the CarModel model
 class User(Base):
     __tablename__ = "users"  # for cloud db
 
@@ -23,9 +24,9 @@ class User(Base):
                         nullable=False, server_default=text('now()'))
     updated_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
-    cars = relationship("CarModel", back_populates="owner")  # This line needs to be present
+    cars = relationship("CarModel", back_populates="user")  # This line needs to be present
 
-    # drivers = relationship("Driver", back_populates="user")
+    drivers = relationship("Driver", back_populates="user")
     
     
     

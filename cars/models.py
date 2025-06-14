@@ -18,9 +18,12 @@ class CarModel(Base):
     c_license = Column(String, unique=True, nullable=False)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.user_id"))
 
-    owner = relationship("User", back_populates="cars")  # This line is crucial
+    # THIS LINE MUST BE PRESENT AND CORRECTLY SPELLED:
+    driver_id = Column(UUID(as_uuid=True), ForeignKey("drivers.id"), nullable=True)
 
-    # driver = relationship("Driver", back_populates="cars")  # This line is crucial
+    user = relationship("User", back_populates="cars")  # This line is crucial
+
+    driver = relationship("Driver", back_populates="cars")  # This line is crucial
 
 model_config = {
         "from_attributes": True,

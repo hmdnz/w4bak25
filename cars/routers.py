@@ -45,7 +45,7 @@ async def update_car(car_id: int, car: CarSchema, user: Annotated[User, Depends(
     db.refresh(db_car)
     return db_car
 
-@router.get("/{car_id}/car", response_description="get a car by id", response_model=CarResponseSchema)
+@router.get("/car/{car_id}", response_description="get a car by id", response_model=CarResponseSchema)
 async def get_car_by_id(car_id: int, user: Annotated[User, Depends(get_current_user)], db: Session = Depends(get_db)):
     car = db.query(CarModel).filter(CarModel.id == car_id).first()
     if car:
@@ -59,7 +59,7 @@ async def check_user_cars(user: Annotated[User, Depends(get_current_user)], db: 
         return JSONResponse(content={"status": True, "message": "user has a valid vehicle"}, status_code=status.HTTP_200_OK)
     return JSONResponse(content={"status": False, "message": "user has no valid vehicle attached to their profile"})
 
-@router.get("/user/all", response_description="get all a user's cars", response_model=List[CarResponseSchema])
+@router.get("/car/all", response_description="get all a user's cars", response_model=List[CarResponseSchema])
 async def get_user_cars(user: Annotated[User, Depends(get_current_user)], db: Session = Depends(get_db)):
     cars = db.query(CarModel).filter(CarModel.user_id == user.user_id).all()
     return cars

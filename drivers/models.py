@@ -1,27 +1,30 @@
-# # -*- coding: utf-8 -*-
-# import uuid
-# from sqlalchemy.dialects.postgresql import UUID
-# from sqlalchemy import Column, String, Boolean, Float, ForeignKey
-# from sqlalchemy.orm import relationship
-# from database import Base
+# drivers/models.py
+import uuid
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, String, Boolean, Float, ForeignKey
+from sqlalchemy.orm import relationship
+from database import Base
 
-# class Driver(Base):
-#     __tablename__ = "drivers"
+# Remove the direct import of CarModel here to break the immediate circular dependency at definition time
+# from cars.models import CarModel # <--- REMOVE OR COMMENT OUT THIS LINE!
 
-#     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-#     nin = Column(String, nullable=False)
-#     driver_license = Column(String, nullable=False)
-#     is_verified = Column(Boolean, default=False)
-#     user_id = Column(UUID(as_uuid=True), ForeignKey("users.user_id"), nullable=True)
+class Driver(Base):
+    __tablename__ = "drivers"
 
-#  # Relationships
-#     owner = relationship("User", back_populates="drivers")
-#     ratings = relationship("Rating", back_populates="driver", cascade="all, delete-orphan")
-#     reviews = relationship("Review", back_populates="driver", cascade="all, delete-orphan")
-#     reports = relationship("Report", back_populates="driver", cascade="all, delete-orphan")
-#     rides = relationship("Ride", back_populates="driver", cascade="all, delete-orphan")
-#     cars = relationship("CarModel", back_populates="driver", cascade="all, delete-orphan")
-#     user=relationship("User", back_populates="drivers")
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    nin = Column(String, nullable=False)
+    driver_license = Column(String, nullable=False)
+    is_verified = Column(Boolean, default=False)
+
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.user_id"), nullable=True)
+
+    user = relationship("User", back_populates="drivers")
+
+    # Change foreign_keys to a string literal referencing the column on the target table.
+    # This tells SQLAlchemy to resolve this reference later, after all models are loaded.
+    cars = relationship("CarModel", back_populates="driver",
+                        foreign_keys="CarModel.driver_id") # <-- CHANGE THIS LINE
+
 
 # class Rating(Base):
 #     __tablename__ = "ratings"
