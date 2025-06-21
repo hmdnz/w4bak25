@@ -158,4 +158,12 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Union[EmailStr, None] = None
+
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+class PasswordResetConfirm(BaseModel):
+    token: str
+    new_password: str
  

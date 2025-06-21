@@ -22,7 +22,18 @@ from database import engine, SessionLocal, get_db, Base
 
 
 from auth.auth import router as auth_router
-from cars.routers import router as car_router   # Ensure you are using the correct import for the router
+from utils.password_reset import router as password_reset_router
+from utils.password_change import router as password_change_router
+from cars.routers import router as car_router
+
+
+# # Include them with tags already defined in each router
+# app.include_router(auth_router)
+# app.include_router(password_reset_router)
+# app.include_router(password_change_router)
+# app.include_router(car_router)
+
+
 # from drivers.routers import router as driver_router
 
 from sqlalchemy.exc import IntegrityError
@@ -33,7 +44,7 @@ from auth.models import *
 
 # from models import User, Driver
 
-print("🔌 SQLAlchemy connected to:", engine.url)
+
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -41,7 +52,9 @@ router= APIRouter()
 
 app = FastAPI()
 
-app.include_router(auth_router, tags=["Authentication"])
+app.include_router(auth_router, tags=["Authentications"])
+app.include_router(password_reset_router, tags=["Password Reset Request"])
+app.include_router(password_change_router, tags=["Password Change Confirm"])
 app.include_router(car_router, tags=["Cars"])
 # app.include_router(driver_router, tags=["Drivers"])
 

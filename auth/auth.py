@@ -11,8 +11,13 @@ from datetime import timedelta
 from typing import Optional, List
 from sqlalchemy.exc import IntegrityError
 
+from .schema import PasswordResetRequest, PasswordResetConfirm
 
-router = APIRouter(tags=['Authentication'])
+from utils.reset_token import create_reset_token, verify_reset_token
+from auth.utils import hash_password
+
+
+router = APIRouter()
 
 
 @router.post('/login', status_code=status.HTTP_200_OK)
@@ -80,57 +85,87 @@ def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not create user")
 
-@router.post('/forgot-password', status_code=status.HTTP_200_OK)
-async def forgot_password(email: str = Form(...), db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.email == email).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User with this email not found")
+# @router.post('/forgot-password', status_code=status.HTTP_200_OK)
+# async def forgot_password(email: str = Form(...), db: Session = Depends(get_db)):
+#     user = db.query(models.User).filter(models.User.email == email).first()
+#     if not user:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User with this email not found")
 
-    # Generate a unique token and associate it with the user (you might need a new model for this)
-    reset_token = oauth2.create_access_token(data={"sub": user.email, "reset": True}, expires_delta=timedelta(minutes=60))
-    # You would typically save this reset_token and user ID in your database
+#     # Generate a unique token and associate it with the user (you might need a new model for this)
+#     reset_token = oauth2.create_access_token(data={"sub": user.email, "reset": True}, expires_delta=timedelta(minutes=60))
+#     # You would typically save this reset_token and user ID in your database
 
-    # Construct the reset link
-    reset_link = f"http://your-frontend-url/reset-password?token={reset_token}&user_id={str(user.id)}" # Replace with your actual frontend URL
+#     # Construct the reset link
+#     reset_link = f"http://your-frontend-url/reset-password?token={reset_token}&user_id={str(user.id)}" # Replace with your actual frontend URL
 
-    # Send the reset email
-    # You'll need to adapt SendPasswordResetMail or create a new function
-    # that uses the reset_link directly.
-    # Example (you might need to adjust arguments):
-    # send_reset_email(user.email, user.name, reset_link)
-    print(f"Reset link sent to {user.email}: {reset_link}") # Replace with actual email sending
+#     # Send the reset email
+#     # You'll need to adapt SendPasswordResetMail or create a new function
+#     # that uses the reset_link directly.
+#     # Example (you might need to adjust arguments):
+#     # send_reset_email(user.email, user.name, reset_link)
+#     print(f"Reset link sent to {user.email}: {reset_link}") # Replace with actual email sending
 
-    return {"message": "Password reset link sent to your email"}
+#     return {"message": "Password reset link sent to your email"}
 
-@router.get('/reset-password', status_code=status.HTTP_200_OK)
-async def show_reset_password_form(token: str, user_id: str):
-    # In a real application, you would verify the token and user_id here
-    # (check if the token is valid, not expired, and associated with the user_id)
-    # If valid, you would serve an HTML form for the user to enter a new password.
-    return {"message": "Please enter your new password", "token": token, "user_id": user_id}
+#############################################################################
+# @router.post('/pwdrest-request', status_code=status.HTTP_200_OK)
+# def request_password_reset(data: PasswordResetRequest, db: Session = Depends(get_db)):
+#     user = db.query(User).filter(User.email == data.email).first()
+#     if not user:
+#         raise HTTPException(status_code=404, detail="User does not exist")
 
-@router.post('/reset-password', status_code=status.HTTP_200_OK)
-async def reset_password(token: str = Form(...), user_id: str = Form(...), new_password: str = Form(...), db: Session = Depends(get_db)):
-    # Verify the token and user_id again
-    # Retrieve the user from the database using the user_id
-    user = db.query(models.User).filter(models.User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid user ID")
+#     token = create_reset_token({"sub": str(user.id)})
+#     send_reset_email(user.email, token)
+#     return {"message": "Reset link sent"}
 
-    # Here you would also check if the token is valid and hasn't expired
-    # (This might involve querying a temporary token storage in your database)
+# @router.post("/reset-password-confirm")
+# def confirm_reset(data: PasswordResetConfirm, db: Session = Depends(get_db)):
+#     user_id = verify_reset_token(data.token)
+#     if not user_id:
+#         raise HTTPException(status_code=400, detail="Invalid or expired token")
 
-    hashed_password = hash_password(new_password)
-    user.password = hashed_password
-    db.commit()
-    return {"message": "Password reset successfully"}
+#     user = db.query(User).filter(User.id == user_id).first()
+#     if not user:
+#         raise HTTPException(status_code=404, detail="User not found")
 
-# You would need to implement the 'send_reset_email' function or adapt
-# 'SendPasswordResetMail' if you want to use the generated token directly
-# in the frontend URL instead of the backend verifying it.
+#     user.password = hash_password(data.new_password)
+#     db.commit()
+#     return {"message": "Password updated successfully"}
 
-# Also, you'll need to decide how you want to handle token storage and verification.
-# The above example provides a basic structure.
+
+
+##################################
+
+
+# @router.get('/reset-password', status_code=status.HTTP_200_OK)
+# async def show_reset_password_form(token: str, user_id: str):
+#     # In a real application, you would verify the token and user_id here
+#     # (check if the token is valid, not expired, and associated with the user_id)
+#     # If valid, you would serve an HTML form for the user to enter a new password.
+#     return {"message": "Please enter your new password", "token": token, "user_id": user_id}
+
+# @router.post('/reset-password', status_code=status.HTTP_200_OK)
+# async def reset_password(token: str = Form(...), user_id: str = Form(...), new_password: str = Form(...), db: Session = Depends(get_db)):
+#     # Verify the token and user_id again
+#     # Retrieve the user from the database using the user_id
+#     user = db.query(models.User).filter(models.User.id == user_id).first()
+#     if not user:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid user ID")
+
+#     # Here you would also check if the token is valid and hasn't expired
+#     # (This might involve querying a temporary token storage in your database)
+
+#     hashed_password = hash_password(new_password)
+#     user.password = hashed_password
+#     db.commit()
+#     return {"message": "Password reset successfully"}
+
+# # You would need to implement the 'send_reset_email' function or adapt
+# # 'SendPasswordResetMail' if you want to use the generated token directly
+# # in the frontend URL instead of the backend verifying it.
+
+# # Also, you'll need to decide how you want to handle token storage and verification.
+# # The above example provides a basic structure.
 
 
 @router.get("/users", response_model=List[schema.UserResponse])
