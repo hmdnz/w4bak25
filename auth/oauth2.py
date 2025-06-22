@@ -6,6 +6,9 @@ from database import get_db
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, timezone
 from auth.schema import TokenData
+from dotenv import load_dotenv
+
+load_dotenv() 
 
 # Define a timezone for GMT+1
 GMT_PLUS_1 = timezone(timedelta(hours=1))
@@ -13,10 +16,14 @@ GMT_PLUS_1 = timezone(timedelta(hours=1))
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-# Replace with your actual secret key
-SECRET_KEY = "$2b$12$aOh6qwsifiUP77n149Ggxue@!FtK"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 100000 # Token expiration time in minutes
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM", "HS256") # Provide a default if it's always HS256
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "100000"))
+
+# --- Important: Add a check for SECRET_KEY ---
+if SECRET_KEY is None:
+    raise ValueError("SECRET_KEY environment variable not set. Please set it in your .env file or environment.")
+
 
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
