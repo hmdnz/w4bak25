@@ -12,7 +12,7 @@ async def send_reset_email(to_email: str, token: str, name: str):
     reset_link = f"https://weny4frontend.com/reset-password?token={token}"
 
     # Load and render the HTML template
-    template = env.get_template("forgotpasswordtemplate.html")
+    template = env.get_template("ForgotPasswordTemplate.html")
     html_content = template.render(name=name, link=reset_link)
 
     # Prepare MIME message
