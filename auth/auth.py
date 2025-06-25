@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, HTTPException, Response, Form
+from fastapi import APIRouter, BackgroundTasks, Depends, status, HTTPException, Response, Form
 from sqlalchemy.orm import Session
 from .schema import UserLogin
 from .utils import verify_password, hash_password, send_email
@@ -11,10 +11,16 @@ from datetime import timedelta
 from typing import Optional, List
 from sqlalchemy.exc import IntegrityError
 
+
+
 from .schema import PasswordResetRequest, PasswordResetConfirm
 
 from utils.reset_token import create_reset_token, verify_reset_token
 from auth.utils import hash_password
+
+
+
+from utils.email import send_email  # ✅ import the new function
 
 
 router = APIRouter()
@@ -41,37 +47,40 @@ async def login(user_cred: OAuth2PasswordRequestForm = Depends(), db: Session = 
     access_token = oauth2.create_access_token(data={"sub": str(user.user_id)})
     return {"access_token": access_token, "token_type": "bearer"}
 
+
 @router.post("/register_users", status_code=status.HTTP_201_CREATED,
-          response_model=schema.UserResponse)
-def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
+             response_model=schema.UserResponse)
+def create_user(
+    background_tasks: BackgroundTasks,  # ✅ move this first
+    user: schema.UserCreate,
+    db: Session = Depends(get_db)
+):
     hashed_pw = hash_password(user.password)
-    
-    print("Hashed password:", hashed_pw)  # For debugging
-    
     user_data = user.model_dump()
-    user_data['password']= hashed_pw
-    
+    user_data['password'] = hashed_pw
+
     new_user = models.User(**user_data)
     db.add(new_user)
     try:
         db.commit()
         db.refresh(new_user)
 
-         # 🔐 Generate token
         access_token = create_access_token(data={"user_id": str(new_user.user_id)})
         print("Bearer Token:", access_token)
 
-        # 📤 Send welcome email after registration
-        send_email(
+        # 📤 Send email using HTML template
+        background_tasks.add_task(
+            send_email,
             to_email=new_user.email,
-            subject="Registration Successful",
-            body=f"Dear {new_user.name},\n\nThank you for registering with us!"
+            subject="Welcome to Weny4!",
+            template_name="ConfirmEmailTemplate.html",
+            context={"name": new_user.name}
         )
 
         return new_user
-    
+
     except IntegrityError as e:
-        db.rollback()
+        db.rollback()        
         if "users_email_key" in str(e.orig):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                                 detail="User with this email already exists")
@@ -84,6 +93,50 @@ def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
         else:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not create user")
+
+# @router.post("/register_users", status_code=status.HTTP_201_CREATED,
+#           response_model=schema.UserResponse)
+# def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
+#     hashed_pw = hash_password(user.password)
+    
+#     print("Hashed password:", hashed_pw)  # For debugging
+    
+#     user_data = user.model_dump()
+#     user_data['password']= hashed_pw
+    
+#     new_user = models.User(**user_data)
+#     db.add(new_user)
+#     try:
+#         db.commit()
+#         db.refresh(new_user)
+
+#          # 🔐 Generate token
+#         access_token = create_access_token(data={"user_id": str(new_user.user_id)})
+#         print("Bearer Token:", access_token)
+
+#         # 📤 Send welcome email after registration
+#         send_email(
+#             to_email=new_user.email,
+#             subject="Registration Successful",
+#             body=f"Dear {new_user.name},\n\nThank you for registering with us!"
+#         )
+
+#         return new_user
+    
+#     except IntegrityError as e:
+#         db.rollback()
+#         if "users_email_key" in str(e.orig):
+#             raise HTTPException(status_code=status.HTTP_409_CONFLICT,
+#                                 detail="User with this email already exists")
+#         elif "users_phone_key" in str(e.orig):
+#             raise HTTPException(status_code=status.HTTP_409_CONFLICT,
+#                                 detail="User with this phone number already exists")
+#         elif "users_nin_key" in str(e.orig):
+#             raise HTTPException(status_code=status.HTTP_409_CONFLICT,
+#                                 detail="User with this NIN already exists")
+#         else:
+#             raise HTTPException(
+#                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not create user")
 
 # @router.post('/forgot-password', status_code=status.HTTP_200_OK)
 # async def forgot_password(email: str = Form(...), db: Session = Depends(get_db)):

@@ -58,6 +58,7 @@ app.include_router(password_change_router, tags=["Password Change Confirm"])
 app.include_router(car_router, tags=["Cars"])
 # app.include_router(driver_router, tags=["Drivers"])
 
+
 def get_db():
     db = SessionLocal()
     try:
@@ -65,7 +66,9 @@ def get_db():
     finally:
         db.close()
 
+from auth.oauth2 import SECRET_KEY
 
+print("SECRET_KEY:", repr(SECRET_KEY))  # Should not be None or empty
 
 
 @app.get("/")

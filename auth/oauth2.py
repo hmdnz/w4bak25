@@ -1,30 +1,45 @@
+# from fastapi import Depends, HTTPException, status
+# from fastapi.security import OAuth2PasswordBearer
+# from jose import jwt, JWTError
+# import jwt  # ✅ This is from PyJWT
+
+# from .models import User
+# from database import get_db
+# from sqlalchemy.orm import Session
+# from datetime import datetime, timedelta, timezone
+# from auth.schema import TokenData
+
+# # Define a timezone for GMT+1
+# GMT_PLUS_1 = timezone(timedelta(hours=1))
+
+
+# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+# # Replace with your actual secret key
+# SECRET_KEY = "my_super_secret_key_123"
+# ALGORITHM = "HS256"
+# ACCESS_TOKEN_EXPIRE_MINUTES = 100 # Token expiration time in minutes
+
 import os
+from dotenv import load_dotenv
+from datetime import datetime, timedelta, timezone
+from jose import JWTError, jwt  # Or: from jwt import encode, decode if you're using PyJWT
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt, JWTError
-from .models import User
-from database import get_db
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta, timezone
 from auth.schema import TokenData
-from dotenv import load_dotenv
+from database import get_db
+from auth.models import User
 
-load_dotenv() 
-
-# Define a timezone for GMT+1
-GMT_PLUS_1 = timezone(timedelta(hours=1))
-
+# Load from .env
+load_dotenv()
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM").strip()
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM", "HS256") # Provide a default if it's always HS256
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "100000"))
-
-# --- Important: Add a check for SECRET_KEY ---
-if SECRET_KEY is None:
-    raise ValueError("SECRET_KEY environment variable not set. Please set it in your .env file or environment.")
-
+GMT_PLUS_1 = timezone(timedelta(hours=1))
 
 
 def create_access_token(data: dict, expires_delta: timedelta = None):

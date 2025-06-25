@@ -1,5 +1,5 @@
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
 
 loaded = load_dotenv()
 print("Did dotenv load:", loaded)
