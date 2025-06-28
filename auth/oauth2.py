@@ -34,7 +34,7 @@ from auth.models import User
 # Load from .env
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM").strip()
+ALGORITHM = (os.getenv("ALGORITHM") or "HS256").strip()
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
