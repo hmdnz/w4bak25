@@ -3,8 +3,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker
 
+
+SQLALCHEMY_DATABASE_URL = 'postgresql://w4Db_owner:npg_AKiG3rd1zqQx@ep-misty-pine-a28okk7q-pooler.eu-central-1.aws.neon.tech/w4Db?sslmode=require&channel_binding=require'
+
 # Ec2 # db connection string
-SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://postgres:postgres@13.247.159.250/wenyfourdb"
+# SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://postgres:postgres@13.247.159.250/wenyfourdb"
 
 # Neon db # connection string
 # SQLALCHEMY_DATABASE_URL = 'postgresql://w4db_owner:npg_xWoI9kDuBU5G@ep-muddy-heart-abkolm3g-pooler.eu-west-2.aws.neon.tech/w4db?sslmode=require'
