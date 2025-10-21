@@ -19,7 +19,8 @@ async def send_email():
     try:
         await aiosmtplib.send(
             message,
-            hostname="smtp.zoho.com",
+            # hostname="smtp.zoho.com", old server before new subscription
+            hostname="smtppro.zoho.com",
             port=587,
             start_tls=True,
             username=email,
