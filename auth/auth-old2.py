@@ -4,14 +4,12 @@ from sqlalchemy.exc import IntegrityError
 from datetime import timedelta
 from typing import Optional, List
 
-from pydantic import BaseModel 
-
 from fastapi.security import OAuth2PasswordRequestForm
 from auth import oauth2, schema, models
 from auth.oauth2 import create_access_token
 
 from database import get_db
-from .models import User 
+from .models import User # Required for login (if User is in .models)
 
 # Utility functions
 from .utils import verify_password
@@ -24,13 +22,6 @@ from .schema import PasswordResetRequest, PasswordResetConfirm
 # --- CRITICAL FIX: Define the missing constant ---
 # ⚠️ IMPORTANT: REPLACE THIS WITH YOUR ACTUAL FRONTEND URL
 FRONTEND_BASE_URL = "http://localhost:3000" 
-
-# --- REMOVED TEMPORARY DEBUG SCHEMA ---
-# class PasswordResetDebugResponse(BaseModel):
-#     message: str
-#     reset_token: Optional[str] = None
-#     reset_link: Optional[str] = None
-# -----------------------------
 
 router = APIRouter()
 
@@ -100,7 +91,7 @@ def create_user(
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not create user")
 
-@router.post('/forgot-password', status_code=status.HTTP_200_OK) # ⬅️ Response model removed here
+@router.post('/forgot-password', status_code=status.HTTP_200_OK)
 async def forgot_password(
     background_tasks: BackgroundTasks, 
     email: str = Form(..., description="Email address for password reset"), 
@@ -113,7 +104,7 @@ async def forgot_password(
     
     # 1. User check
     if not user:
-        # Security practice: always return a generic success message if the user is not found
+        # Security practice: return a generic success message
         return {"message": "If an account with that email exists, a password reset link has been sent."}
 
     # 2. Generate Reset Token (JWT)
@@ -123,6 +114,7 @@ async def forgot_password(
     )
 
     # 3. Construct the Reset Link
+    # This line now works because FRONTEND_BASE_URL is defined above.
     reset_link = f"{FRONTEND_BASE_URL}/reset-password?token={reset_token}" 
 
     # 4. Send Email asynchronously
@@ -131,66 +123,11 @@ async def forgot_password(
         to_email=user.email,
         subject="Password Reset Request",
         # Use the HTML template from your templates folder
-        template_name="ForgetPasswordTemplate.html", 
+        template_name="ForgotPasswordTemplate.html", 
         context={
             "name": user.name, 
             "reset_link": reset_link
         }
     )
 
-    # 5. SECURE RETURN: Only return the generic message for security
     return {"message": "If an account with that email exists, a password reset link has been sent."}
-
-
-# ----------------------------------------------------------------------
-# ENDPOINT FOR PASSWORD CONFIRMATION 
-# ----------------------------------------------------------------------
-
-@router.post('/reset-password-confirm', status_code=status.HTTP_200_OK)
-def reset_password_confirm(
-    data: schema.PasswordResetConfirm, 
-    db: Session = Depends(get_db)
-):
-    """
-    Finalizes the password reset process.
-    It verifies the reset token and updates the user's password.
-    """
-    
-    # 1. Verify and Decode Token
-    try:
-        # Use the utility function to get the raw payload dictionary
-        token_data = oauth2.decode_token_payload(data.token)
-        # print(f"Decoded payload data: {token_data}") # ⬅️ DEBUG LINE REMOVED
-
-    except HTTPException:
-        # This catches errors like Invalid token signature, expired token, etc.
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token. Please request a new password reset.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    # 2. Extract and Validate Data from Token Payload
-    user_id = token_data.get("sub")
-    is_reset_token = token_data.get("reset")
-
-    # Check for required fields and the 'reset' flag (must be explicitly True)
-    if not user_id or is_reset_token is not True:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid token or token not intended for password reset.",
-        )
-
-    # 3. Find the User
-    user = db.query(models.User).filter(models.User.user_id == user_id).first()
-
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
-
-    # 4. Hash the New Password and Update
-    hashed_password = hash_password(data.new_password)
-    user.password = hashed_password
-    
-    db.commit()
-
-    return {"message": "Password updated successfully! You can now log in with your new password."}

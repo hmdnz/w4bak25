@@ -50,7 +50,24 @@ models.Base.metadata.create_all(bind=engine)
 
 router= APIRouter()
 
-app = FastAPI()
+# app = FastAPI()
+
+app = FastAPI(
+    title="Wenyfour Car Sharing API",
+    description="Backend API for the W4 application — manage users, cars, booking, payment and authentication.",
+    version="1.0.0",
+    contact={
+        "name": "W4 Team",
+        "url": "https://www.wenyfour.com",
+        "email": "support@wwenyfour.com",
+    },
+    license_info={
+        "name": "MIT License",
+        "url": "https://opensource.org/licenses/MIT",
+    },
+)
+
+
 
 app.include_router(auth_router, tags=["Authentications"])
 app.include_router(password_reset_router, tags=["Password Reset Request"])

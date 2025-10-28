@@ -25,11 +25,12 @@ from .schema import PasswordResetRequest, PasswordResetConfirm
 # ⚠️ IMPORTANT: REPLACE THIS WITH YOUR ACTUAL FRONTEND URL
 FRONTEND_BASE_URL = "http://localhost:3000" 
 
-# --- REMOVED TEMPORARY DEBUG SCHEMA ---
-# class PasswordResetDebugResponse(BaseModel):
-#     message: str
-#     reset_token: Optional[str] = None
-#     reset_link: Optional[str] = None
+# --- TEMPORARY DEBUG SCHEMA ---
+# Used to expose the token in the API response for debugging purposes.
+class PasswordResetDebugResponse(BaseModel):
+    message: str
+    reset_token: Optional[str] = None
+    reset_link: Optional[str] = None
 # -----------------------------
 
 router = APIRouter()
@@ -100,7 +101,7 @@ def create_user(
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not create user")
 
-@router.post('/forgot-password', status_code=status.HTTP_200_OK) # ⬅️ Response model removed here
+@router.post('/forgot-password', status_code=status.HTTP_200_OK, response_model=PasswordResetDebugResponse) 
 async def forgot_password(
     background_tasks: BackgroundTasks, 
     email: str = Form(..., description="Email address for password reset"), 
@@ -108,12 +109,14 @@ async def forgot_password(
 ):
     """
     Initiates the password reset process by sending an email with a reset token.
+    
+    WARNING: In this version, the token is exposed in the API response for debugging.
     """
     user = db.query(models.User).filter(models.User.email == email).first()
     
     # 1. User check
     if not user:
-        # Security practice: always return a generic success message if the user is not found
+        # Security practice: still return a generic success message if the user is not found
         return {"message": "If an account with that email exists, a password reset link has been sent."}
 
     # 2. Generate Reset Token (JWT)
@@ -138,12 +141,16 @@ async def forgot_password(
         }
     )
 
-    # 5. SECURE RETURN: Only return the generic message for security
-    return {"message": "If an account with that email exists, a password reset link has been sent."}
+    # 5. TEMPORARY DEBUG RETURN: Expose the token and link in the API response
+    return {
+        "message": "Password reset link sent.", 
+        "reset_token": reset_token, 
+        "reset_link": reset_link 
+    }
 
 
 # ----------------------------------------------------------------------
-# ENDPOINT FOR PASSWORD CONFIRMATION 
+# ✅ ENDPOINT FOR PASSWORD CONFIRMATION (Uses the corrected decode_token_payload)
 # ----------------------------------------------------------------------
 
 @router.post('/reset-password-confirm', status_code=status.HTTP_200_OK)
@@ -158,9 +165,10 @@ def reset_password_confirm(
     
     # 1. Verify and Decode Token
     try:
-        # Use the utility function to get the raw payload dictionary
+        # Use the new utility function to get the raw payload dictionary
         token_data = oauth2.decode_token_payload(data.token)
-        # print(f"Decoded payload data: {token_data}") # ⬅️ DEBUG LINE REMOVED
+        # 🔑 DEBUG: Check the contents of the payload
+        print(f"Decoded payload data: {token_data}") 
 
     except HTTPException:
         # This catches errors like Invalid token signature, expired token, etc.
@@ -176,6 +184,7 @@ def reset_password_confirm(
 
     # Check for required fields and the 'reset' flag (must be explicitly True)
     if not user_id or is_reset_token is not True:
+        print("Invalid token usage: missing 'sub' or 'reset' flag.") # 🔑 DEBUG
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid token or token not intended for password reset.",
